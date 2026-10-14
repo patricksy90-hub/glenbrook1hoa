@@ -1,0 +1,66 @@
+name: Android test APK
+
+on:
+  push:
+    branches: [gatebell-android-test]
+    paths:
+      - gatebell-android-build-source.zip
+      - .github/workflows/android-test-apk.yml
+  workflow_dispatch:
+    inputs:
+      api_hostname:
+        description: "Optional HTTPS API hostname; leave blank to use the ZIP's test target"
+        type: string
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unpack build source and check Firebase client configuration
+        env:
+          FIREBASE_ANDROID_CONFIG_JSON: ${{ secrets.FIREBASE_ANDROID_CONFIG_JSON }}
+          API_HOST_INPUT: ${{ inputs.api_hostname }}
+        run: |
+          unzip -q gatebell-android-build-source.zip -d "$RUNNER_TEMP/gatebell-source"
+          node <<'JS'
+          const fs = require('node:fs');
+          const root = `${process.env.RUNNER_TEMP}/gatebell-source`;
+          const {validateAndroidConfig, validateDomain} = require(`${root}/artifacts/hoa-tracker-mobile/scripts/android-build-config.cjs`);
+          validateAndroidConfig(process.env.FIREBASE_ANDROID_CONFIG_JSON);
+          const target = process.env.API_HOST_INPUT || fs.readFileSync(`${root}/.github/gatebell-test-api-hostname.txt`, 'utf8').trim();
+          fs.appendFileSync(process.env.GITHUB_ENV, `EXPO_PUBLIC_DOMAIN=${validateDomain(target)}\n`);
+          console.log('Build source, Android client configuration and API hostname are ready.');
+          JS
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.26.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: android-actions/setup-android@v3
+      - name: Install Android build dependencies
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0" "ndk;27.1.12297006" "cmake;3.22.1"
+      - name: Verify and build standalone test APK
+        env:
+          FIREBASE_ANDROID_CONFIG_JSON: ${{ secrets.FIREBASE_ANDROID_CONFIG_JSON }}
+        run: |
+          node --test "$RUNNER_TEMP/gatebell-source/artifacts/hoa-tracker-mobile/scripts/android-build-config.test.cjs"
+          node "$RUNNER_TEMP/gatebell-source/artifacts/hoa-tracker-mobile/scripts/build-android-apk.cjs"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gatebell-android-test-${{ github.run_number }}
+          path: |
+            ${{ runner.temp }}/gatebell-source/generated-artifacts/android/gatebell-test.apk
+            ${{ runner.temp }}/gatebell-source/generated-artifacts/android/gatebell-test.apk.json
+          if-no-files-found: error
+          retention-days: 7
