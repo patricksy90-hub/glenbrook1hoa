@@ -1,0 +1,96 @@
+name: Android resident release APK
+
+on:
+  push:
+    branches:
+      - android-resident-release
+  workflow_dispatch:
+    inputs:
+      api_hostname:
+        description: "Verified production API hostname (no scheme or path)"
+        type: string
+        required: true
+      portal_url:
+        description: "Verified production portal URL (https://...)"
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-resident-release
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    environment: android-release
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.26.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: ''
+      - name: Check release configuration and production API
+        env:
+          API_HOST_INPUT: ${{ inputs.api_hostname }}
+          PORTAL_URL_INPUT: ${{ inputs.portal_url }}
+          FIREBASE_ANDROID_CONFIG_JSON: ${{ secrets.FIREBASE_ANDROID_CONFIG_JSON }}
+          ANDROID_RELEASE_KEYSTORE_BASE64: ${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}
+          ANDROID_RELEASE_STORE_PASSWORD: ${{ secrets.ANDROID_RELEASE_STORE_PASSWORD }}
+          ANDROID_RELEASE_KEY_PASSWORD: ${{ secrets.ANDROID_RELEASE_KEY_PASSWORD }}
+          ANDROID_RELEASE_KEY_ALIAS: ${{ vars.ANDROID_RELEASE_KEY_ALIAS }}
+          ANDROID_RELEASE_CERT_SHA256: ${{ vars.ANDROID_RELEASE_CERT_SHA256 }}
+        run: |
+          node <<'JS'
+          const fs = require('node:fs');
+          const { buildEnvironment, validateAndroidConfig } = require('./artifacts/hoa-tracker-mobile/scripts/android-build-config.cjs');
+          const { releaseConfig } = require('./artifacts/hoa-tracker-mobile/scripts/android-release-config.cjs');
+          const target = JSON.parse(fs.readFileSync('.github/android-release-target.json', 'utf8'));
+          const env = buildEnvironment({
+            ...process.env,
+            EXPO_PUBLIC_DOMAIN: process.env.API_HOST_INPUT || target.apiHostname,
+            EXPO_PUBLIC_WEB_PORTAL_URL: process.env.PORTAL_URL_INPUT || target.portalUrl,
+          });
+          releaseConfig(process.env);
+          validateAndroidConfig(process.env.FIREBASE_ANDROID_CONFIG_JSON);
+          fs.appendFileSync(process.env.GITHUB_ENV, `EXPO_PUBLIC_DOMAIN=${env.EXPO_PUBLIC_DOMAIN}\nEXPO_PUBLIC_WEB_PORTAL_URL=${env.EXPO_PUBLIC_WEB_PORTAL_URL}\n`);
+          fetch(`https://${env.EXPO_PUBLIC_DOMAIN}/api/healthz`, { signal: AbortSignal.timeout(20000) })
+            .then(async response => {
+              if (!response.ok || !(response.headers.get('content-type') || '').includes('application/json')) throw new Error('Production API is not reachable.');
+              console.log('Release configuration and production API checks passed.');
+            }).catch(error => { console.error(error.message); process.exitCode = 1; });
+          JS
+      - name: Install Android build dependencies
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0" "ndk;27.1.12297006" "cmake;3.22.1"
+      - name: Test build configuration
+        run: node --test artifacts/hoa-tracker-mobile/scripts/android-build-config.test.cjs artifacts/hoa-tracker-mobile/scripts/android-release-config.test.cjs
+      - name: Build and verify standalone production-signed APK
+        env:
+          FIREBASE_ANDROID_CONFIG_JSON: ${{ secrets.FIREBASE_ANDROID_CONFIG_JSON }}
+          ANDROID_RELEASE_KEYSTORE_BASE64: ${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}
+          ANDROID_RELEASE_STORE_PASSWORD: ${{ secrets.ANDROID_RELEASE_STORE_PASSWORD }}
+          ANDROID_RELEASE_KEY_PASSWORD: ${{ secrets.ANDROID_RELEASE_KEY_PASSWORD }}
+          ANDROID_RELEASE_KEY_ALIAS: ${{ vars.ANDROID_RELEASE_KEY_ALIAS }}
+          ANDROID_RELEASE_CERT_SHA256: ${{ vars.ANDROID_RELEASE_CERT_SHA256 }}
+        run: node artifacts/hoa-tracker-mobile/scripts/build-android-release.cjs
+      - name: Upload verified APK and non-secret metadata only
+        uses: actions/upload-artifact@v4
+        with:
+          name: glenbrook1-android-release-${{ github.run_number }}
+          path: |
+            generated-artifacts/android/glenbrook1-android.apk
+            generated-artifacts/android/glenbrook1-android.apk.json
+          if-no-files-found: error
+          retention-days: 7

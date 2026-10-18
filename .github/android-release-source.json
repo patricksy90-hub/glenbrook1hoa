@@ -1,0 +1,273 @@
+{
+  "purpose": "glenbrook1-approved-mobile-release-source",
+  "files": [
+    {
+      "path": "package.json",
+      "sha256": "56a5f31503225f4760b31dcbdaa4b4e7a4aefb67d50f11d240551c5284e282fa"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "59af212a7ec1cf8e26e2d9f4139c73dd6bcc23ed000785ad0ee479f9e0bd3034"
+    },
+    {
+      "path": "pnpm-workspace.yaml",
+      "sha256": "2c427cc5e72452bb831d0cd81a3555e165b58d798ab9b6b319a2a46882d55dfe"
+    },
+    {
+      "path": "tsconfig.base.json",
+      "sha256": "71a4e86fb157f7bd574845c30877f4328c7f2fb1bdc3037890aac4cc4649b819"
+    },
+    {
+      "path": ".github/workflows/android-release-apk.yml",
+      "sha256": "f19c78fbb997f14a6ff0326b20280fa6ea5010391fd5ff458022d299ff92d4dd"
+    },
+    {
+      "path": ".github/android-release-target.json",
+      "sha256": "a2fd0a40fe02adadcd16849b355b1374ac7d5604edfe5595229dd9522df8f565"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/app/(auth)/login.tsx",
+      "sha256": "a4dfd8b0ecd78ee958beb8117390c6cbfc6befd3e15a0fdbfb518f3cc24048b7"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/app/(auth)/mfa.tsx",
+      "sha256": "03983f6e3116ae42a18881a6d417998fdf6f5834be2ae50f98adbfa472b4aa4c"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/app/(auth)/quick-access.tsx",
+      "sha256": "31c57002bc40bd7e3fe1646baa2ea261a7371313447189a1e5603eff4ab2d69f"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/app/(tabs)/_layout.tsx",
+      "sha256": "0e40fe4d9d990fccf232bb5fd7d62f250699fb1b8eaaccba85163eb23cf41c9a"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/app/(tabs)/community.tsx",
+      "sha256": "8813ab72a6121ff4460b1810257ed356225df136baf93834c42a4a27f6b2565b"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/app/(tabs)/dues.tsx",
+      "sha256": "e02a383cf49a9bfb784ab69311682e3425d3bd59793c7b05655628dd10a10f80"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/app/(tabs)/id.tsx",
+      "sha256": "99a3ae56c9822f5b1ec418dfe9d419478b841b4587a3603e4856197cc7a1b9aa"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/app/(tabs)/index.tsx",
+      "sha256": "b44fd41767ccf4b9f6e315801e834bbca68f590ede07671b43583f346d20f21a"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/app/(tabs)/more.tsx",
+      "sha256": "82a9e9f36fe3187e00b622662a6cfe67c0f4fc05851159720e04371eab214a64"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/app/+not-found.tsx",
+      "sha256": "4ce0de1be2578ecf74b8b2f7761a145cbe834a33a07741a08e377fc76bc7c03b"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/app/_layout.tsx",
+      "sha256": "f83d88c4bb62a4dca9d89b391480164bf624ac53e933b0087487d957f1ae6129"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/app/applications.tsx",
+      "sha256": "5e49adefac94dc8daf827431775ef06afddef5757fb8e87b9d65ea12220d589f"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/app/feedback.tsx",
+      "sha256": "58bf12a527ea39cc9e865085351190d68829ce32c32095bf0a38a2e9f3b74819"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/app/gatebell.tsx",
+      "sha256": "6beca13baf8ae47bf8be313b8dec4918c9e56ee64f906610b9a5af69fbb90645"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/app/household.tsx",
+      "sha256": "0aef312c6cf00f2afa69574e3da1136318036453ccfbde34f62bbbd27b9dc137"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/app/notifications.tsx",
+      "sha256": "316684b345fcdd3359af4d83446127fd96e52f790556a1aac3732d1d813e98a6"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/app/portal-handoff.tsx",
+      "sha256": "869cc7dc9fbafc1917437bb9859e29eaeb54a66f75a1b606b95fa13e8ba26051"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/app/security.tsx",
+      "sha256": "717a2227153ed94b19a8761dcbd3e6a78376ab18d8e2cc4ec9d5cc2d6af7cbc3"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/assets/id-signatures/president.png",
+      "sha256": "516ebe1e328f9c69bf08c403aebed2cc09a2b26b6f5fedfec565bf7777c39070"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/assets/id-signatures/secretary.png",
+      "sha256": "23c01d8505111081cd94694dd562cba8cb94a1952ea03df82d4b94cab6fadb24"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/assets/id-signatures/vice-president.png",
+      "sha256": "1b370c17a2266f76f544111002da3b8c9a358f993f829baa19b4266dd41799a8"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/assets/images/icon.png",
+      "sha256": "33480f69d6acb1c90b1d746444701dcb0b59942cfdf41c6fe0f8d0edea18ce3c"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/assets/images/neighborhood-hero.jpg",
+      "sha256": "7e164ac6648197370a6e556cc0acce18a919b2693d635f7097bc41974d447e31"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/assets/images/splash-icon.png",
+      "sha256": "d2b02103b60e84d110a1aa4efed6a055ea7bcec927b2440edf10fce0ad451994"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/components/DuesPaymentSheet.tsx",
+      "sha256": "e8d4eed7976d72b35f35b0c01798192061d7a19dc18e2df362f90428ce07cdd2"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/components/ErrorBoundary.tsx",
+      "sha256": "4e6d457cbb4b8c25922e431e08f3a60c036bada40482999ccd897d510334c846"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/components/ErrorFallback.tsx",
+      "sha256": "afd5093c4c57531ba51fd1c4698177064c2576ce43d9a65978c9bf1b0f2aa531"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/components/KeyboardAwareScrollViewCompat.tsx",
+      "sha256": "5f55681a8a1f4293cf3c5da92a42cbdf22eceec50d71437b78e43ffdfa6bbb88"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/components/ScreenState.tsx",
+      "sha256": "6042552682049c0cbd4237dc17f239b68269684bb886aaf4f7fb7ba58a45cde2"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/components/Surface.tsx",
+      "sha256": "e88ae6f71d9b99542242bd8840fec237bc2f988c934488b6503ccd5422f0281c"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/constants/colors.ts",
+      "sha256": "6e93e736308ce290f66bc74e468ecfe2e69ac153998f0ba99fa11462d98c5138"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/contexts/AuthContext.tsx",
+      "sha256": "4418c88d73ee94c3bc78642cd360faf29169a4cdb82b47a7510ec6c482133cf4"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/hooks/useColors.ts",
+      "sha256": "0a0cc5d229c3acf1ebe6742d4782d2a9330711bee35933fd3176b253a1aaa9e4"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/lib/duesPayment.ts",
+      "sha256": "c9dfb6000d678dc76cfe815c8e1ee53a0cfbdf4112af1efc3adedf466932ce54"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/lib/format.ts",
+      "sha256": "2e531f39f8d0d04756b89e40a00cfb748e35af597b1f3cf82845a535e39ceb38"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/lib/gateBellDevice.ts",
+      "sha256": "8ba3a9703d501bc457240fc221bff92b0f8153f44bfc75c85a7fe630b1ba5178"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/lib/mobileTokens.ts",
+      "sha256": "1197324084f6596041f50336c53fd6a84b98a081230fecd25e7dc4f0fd39ae3c"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/lib/residentId.ts",
+      "sha256": "3f3c96892171a0e749b406e37a3ab491e7d8a8f809a81bfc0d071768f41369e3"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/lib/tabBarLayout.ts",
+      "sha256": "55d693af88b789fb2b3e111a618181563d2a392bd7e318a0c777308b6055fceb"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/app.json",
+      "sha256": "ae34bd8eb45f148bdfd0a5ae9017719a2eeb8c28b891d7e34e15a9322c782166"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/package.json",
+      "sha256": "48b522772b14ddaed139e19463cf05ef6bf724c1c46f6c7b0f975d08dddf1de0"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/metro.config.js",
+      "sha256": "0d2906cd24cc51269fbca472f3f68ab2fd79ad2347f301745811363270943d7c"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/babel.config.js",
+      "sha256": "c49ff25203beb7382ddf182783de7e9ee7f7860c36e8d2a8eb0f322732208278"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/tsconfig.json",
+      "sha256": "0c3b4302e65a39f8feff9f70eaa5f8bad6d221de7dda86dccce363e136dbe958"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/expo-env.d.ts",
+      "sha256": "6fc02634da46d3edc5a88eec9173ba6bf709726be3cba83c73ebd8e859d5c147"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/scripts/android-build-config.cjs",
+      "sha256": "a1833d0924d9c59091c0cfd9182f9ced75acf0fc056e98d10bd82459b5da4d06"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/scripts/android-build-config.test.cjs",
+      "sha256": "fb876136898c370c5ec5a08f10999d5611531bcdd9ba2b70d8a53b827b986613"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/scripts/android-release-config.cjs",
+      "sha256": "6c88264abc3273550454fa2c86b352ee225f0c899ef68f058ec60e2d805510b0"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/scripts/android-release-config.test.cjs",
+      "sha256": "7cc2b3afd69b34490f2b5dcef676e02e64dc4b951c9eb93674134606ce359a6b"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/scripts/build-android-apk.cjs",
+      "sha256": "8efc7db30570490864f27c98fb2b17fc7212ab2088643464d0781c3b118b1067"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/scripts/build-android-release.cjs",
+      "sha256": "246f52438c6d32cd1ada546e2cc6b55455a9707acad8ba6a3d5bced82ad594e9"
+    },
+    {
+      "path": "lib/api-client-react/package.json",
+      "sha256": "ae70f97a12d1f7e7cbb291b5ffd1d6893f0d7a0ff7721a21e615d47bccfad789"
+    },
+    {
+      "path": "lib/designation/package.json",
+      "sha256": "b058d5af203f9d984c5a545a659b9c7b92446cfed0511d29d659fa14104971b8"
+    },
+    {
+      "path": "lib/api-client-react/tsconfig.json",
+      "sha256": "7e9d09ae244912d5d1add40373fc8dfb98200e903c0994aba4faee4a5afc3489"
+    },
+    {
+      "path": "lib/designation/tsconfig.json",
+      "sha256": "a1d54f6fb642b02194b24d046de82fb16d2d12f44d7fdaf6c6d731e574bbb423"
+    },
+    {
+      "path": "lib/api-client-react/src/custom-fetch.ts",
+      "sha256": "af61bbaf7ac25ec30fc1e7c1f59459d22370ab0855e24a635eec531c54540f2a"
+    },
+    {
+      "path": "lib/api-client-react/src/generated/api.schemas.ts",
+      "sha256": "ed0a7f07c9c609a2f8a9301aa7ace765e85279b3476550a7cd212074c4853afc"
+    },
+    {
+      "path": "lib/api-client-react/src/generated/api.ts",
+      "sha256": "eaf3913f747a1fe413a33852c074d7f47f4f1bfbe8afba2473196a301053700a"
+    },
+    {
+      "path": "lib/api-client-react/src/index.ts",
+      "sha256": "3735519b0b43e56d8562fe495b102bf0c7d77941fba174363d608625befec482"
+    },
+    {
+      "path": "lib/designation/src/index.ts",
+      "sha256": "7d36f21b317cf86e10c8b740c36023531e4a754df49645070b0d30dfff02f056"
+    },
+    {
+      "path": "README.md",
+      "sha256": "f67f7fba32f78a9d242bdcdeec81cb4fbfc7fc047f0927ea17e412626823a4e6"
+    }
+  ]
+}
