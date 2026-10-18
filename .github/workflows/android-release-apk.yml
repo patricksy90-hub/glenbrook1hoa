@@ -52,6 +52,8 @@ jobs:
           ANDROID_RELEASE_KEY_PASSWORD: ${{ secrets.ANDROID_RELEASE_KEY_PASSWORD }}
           ANDROID_RELEASE_KEY_ALIAS: ${{ vars.ANDROID_RELEASE_KEY_ALIAS }}
           ANDROID_RELEASE_CERT_SHA256: ${{ vars.ANDROID_RELEASE_CERT_SHA256 }}
+          APK_UPLOAD_URL: ${{ secrets.ANDROID_RELEASE_APK_UPLOAD_URL }}
+          METADATA_UPLOAD_URL: ${{ secrets.ANDROID_RELEASE_METADATA_UPLOAD_URL }}
         run: |
           node <<'JS'
           const fs = require('node:fs');
@@ -65,6 +67,11 @@ jobs:
           });
           releaseConfig(process.env);
           validateAndroidConfig(process.env.FIREBASE_ANDROID_CONFIG_JSON);
+          for (const name of ['APK_UPLOAD_URL', 'METADATA_UPLOAD_URL']) {
+            if (!process.env[name] || new URL(process.env[name]).hostname !== 'storage.googleapis.com') {
+              throw new Error('Prepare fresh private release-transfer credentials before starting this build.');
+            }
+          }
           fs.appendFileSync(process.env.GITHUB_ENV, `EXPO_PUBLIC_DOMAIN=${env.EXPO_PUBLIC_DOMAIN}\nEXPO_PUBLIC_WEB_PORTAL_URL=${env.EXPO_PUBLIC_WEB_PORTAL_URL}\n`);
           fetch(`https://${env.EXPO_PUBLIC_DOMAIN}/api/healthz`, { signal: AbortSignal.timeout(20000) })
             .then(async response => {
@@ -85,12 +92,25 @@ jobs:
           ANDROID_RELEASE_KEY_ALIAS: ${{ vars.ANDROID_RELEASE_KEY_ALIAS }}
           ANDROID_RELEASE_CERT_SHA256: ${{ vars.ANDROID_RELEASE_CERT_SHA256 }}
         run: node artifacts/hoa-tracker-mobile/scripts/build-android-release.cjs
-      - name: Upload verified APK and non-secret metadata only
-        uses: actions/upload-artifact@v4
-        with:
-          name: glenbrook1-android-release-${{ github.run_number }}
-          path: |
-            generated-artifacts/android/glenbrook1-android.apk
-            generated-artifacts/android/glenbrook1-android.apk.json
-          if-no-files-found: error
-          retention-days: 7
+      - name: Transfer verified release to private staging only
+        env:
+          APK_UPLOAD_URL: ${{ secrets.ANDROID_RELEASE_APK_UPLOAD_URL }}
+          METADATA_UPLOAD_URL: ${{ secrets.ANDROID_RELEASE_METADATA_UPLOAD_URL }}
+        run: |
+          node <<'JS'
+          const fs = require('node:fs');
+          (async () => {
+            for (const [name, suffix, contentType] of [
+              ['APK_UPLOAD_URL', '.apk', 'application/vnd.android.package-archive'],
+              ['METADATA_UPLOAD_URL', '.apk.json', 'application/json'],
+            ]) {
+              const bytes = fs.readFileSync(`generated-artifacts/android/glenbrook1-android${suffix}`);
+              const response = await fetch(process.env[name], {
+                method: 'PUT', headers: { 'Content-Type': contentType, 'Content-Length': String(bytes.length) },
+                body: bytes, signal: AbortSignal.timeout(300000),
+              });
+              if (!response.ok) throw new Error(`Private release transfer failed (HTTP ${response.status}).`);
+            }
+            console.log('Verified APK and metadata transferred to private release staging. No downloadable GitHub artifact was created.');
+          })().catch(() => { console.error('Private release transfer failed. Inspect credentials without printing upload URLs.'); process.exitCode = 1; });
+          JS

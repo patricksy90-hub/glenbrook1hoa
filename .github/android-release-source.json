@@ -19,7 +19,7 @@
     },
     {
       "path": ".github/workflows/android-release-apk.yml",
-      "sha256": "f19c78fbb997f14a6ff0326b20280fa6ea5010391fd5ff458022d299ff92d4dd"
+      "sha256": "d324f6a454198154f812811b9acc9b6ace4ed67137e3e5f78bb5b4fe7a7ba9d3"
     },
     {
       "path": ".github/android-release-target.json",
