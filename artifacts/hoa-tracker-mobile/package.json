@@ -9,7 +9,7 @@
     "android:apk": "node scripts/build-android-apk.cjs",
     "android:release": "node scripts/build-android-release.cjs",
     "android:preflight": "node scripts/build-android-apk.cjs --prepare-only",
-    "test:android-build": "node --test scripts/android-build-config.test.cjs scripts/android-release-config.test.cjs",
+    "test:android-build": "node --test scripts/android-build-config.test.cjs scripts/android-release-config.test.cjs scripts/cold-start-navigation.test.cjs",
     "serve": "node server/serve.js",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },

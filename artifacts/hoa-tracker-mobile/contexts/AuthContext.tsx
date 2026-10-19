@@ -10,6 +10,7 @@ import {
   unregisterGateBellDevice,
 } from '@workspace/api-client-react';
 import { useQueryClient } from '@tanstack/react-query';
+import { getAuthNavigationDecision } from '@/lib/coldStartNavigation';
 import {
   deleteMobileToken,
   getMobileToken,
@@ -52,6 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [mfaMaskedEmail, setMfaMaskedEmail] = useState<string | null>(null);
   const [quickAccessMode, setQuickAccessMode] = useState<QuickAccessMode | null>(null);
   const [quickAccessStep, setQuickAccessStep] = useState<QuickAccessStep>(null);
+  const [pendingGateBellDestination, setPendingGateBellDestination] = useState(false);
   const router = useRouter();
   const segments = useSegments();
   const queryClient = useQueryClient();
@@ -60,7 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const refreshTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const booting = useRef(true);
   const backgrounded = useRef(false);
-  const pendingGateBellDestination = useRef(false);
+  const coldStartRouteResolved = useRef(false);
 
   const scheduleRefresh = (expiresAtStr: string) => {
     if (refreshTimer.current) clearTimeout(refreshTimer.current);
@@ -83,6 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const currentUserId = user?.id;
   const clearLocalSession = useCallback(async (clearQuickAccess = false) => {
     if (refreshTimer.current) clearTimeout(refreshTimer.current);
+    if (clearQuickAccess) setPendingGateBellDestination(false);
     if (clearQuickAccess && currentUserId && Platform.OS === 'android') {
       await deleteMobileToken(quickAccessKey(currentUserId));
     }
@@ -143,7 +146,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const completeQuickAccessUnlock = useCallback(() => setQuickAccessStep(null), []);
   const returnToGateBellAfterUnlock = useCallback(() => {
-    pendingGateBellDestination.current = true;
+    setPendingGateBellDestination(true);
   }, []);
 
   const refreshSession = useCallback(async () => {
@@ -226,26 +229,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [refreshSession, clearLocalSession]);
 
   useEffect(() => {
-    if (isLoading) return;
-    
     const inAuthGroup = segments[0] === '(auth)';
     const isMfaRoute = segments.some((segment) => String(segment) === 'mfa');
-    
-    if (loginState === 'unauthenticated' && !inAuthGroup) {
-      router.replace('/(auth)/login');
-    } else if ((loginState === 'pending_mfa' || loginState === 'pending_enrollment') && !isMfaRoute) {
-      router.replace('/(auth)/mfa');
-    } else if (loginState === 'authenticated') {
-      const isQuickAccessRoute = segments[0] === '(auth)' && segments[1] === 'quick-access';
-      if (quickAccessStep && !isQuickAccessRoute) {
-        router.replace('/(auth)/quick-access');
-      } else if (!quickAccessStep && inAuthGroup) {
-        const destination = pendingGateBellDestination.current ? '/gatebell' : '/(tabs)';
-        pendingGateBellDestination.current = false;
-        router.replace(destination);
-      }
-    }
-  }, [loginState, quickAccessStep, segments, isLoading, router]);
+    const isQuickAccessRoute = segments[0] === '(auth)' && segments[1] === 'quick-access';
+    const isHomeRoute = segments[0] === '(tabs)' && segments.length === 1;
+    const isGateBellRoute = segments[0] === 'gatebell';
+    const decision = getAuthNavigationDecision({
+      isLoading,
+      loginState,
+      inAuthGroup,
+      isMfaRoute,
+      isQuickAccessRoute,
+      isHomeRoute,
+      isGateBellRoute,
+      quickAccessStep,
+      coldStartResolved: coldStartRouteResolved.current,
+      pendingGateBellDestination,
+    });
+
+    if (!decision) return;
+    if (decision.resolveColdStart) coldStartRouteResolved.current = true;
+    if (decision.consumePendingGateBell) setPendingGateBellDestination(false);
+    if (decision.destination) router.replace(decision.destination);
+  }, [loginState, quickAccessStep, segments, isLoading, pendingGateBellDestination, router]);
 
   useEffect(() => {
     if (Platform.OS !== 'android') return;

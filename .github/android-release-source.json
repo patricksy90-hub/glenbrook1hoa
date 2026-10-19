@@ -19,7 +19,7 @@
     },
     {
       "path": ".github/workflows/android-release-apk.yml",
-      "sha256": "d324f6a454198154f812811b9acc9b6ace4ed67137e3e5f78bb5b4fe7a7ba9d3"
+      "sha256": "3eaf4edee40be4c15d63f6e53a92a37727261161320fe3a4baa2edbd9844dab3"
     },
     {
       "path": ".github/android-release-target.json",
@@ -67,7 +67,7 @@
     },
     {
       "path": "artifacts/hoa-tracker-mobile/app/_layout.tsx",
-      "sha256": "f83d88c4bb62a4dca9d89b391480164bf624ac53e933b0087487d957f1ae6129"
+      "sha256": "f6fa6d331578736d8079200ef7f98317ac6ae5f43992d6391e368fcad09621a0"
     },
     {
       "path": "artifacts/hoa-tracker-mobile/app/applications.tsx",
@@ -151,11 +151,19 @@
     },
     {
       "path": "artifacts/hoa-tracker-mobile/contexts/AuthContext.tsx",
-      "sha256": "4418c88d73ee94c3bc78642cd360faf29169a4cdb82b47a7510ec6c482133cf4"
+      "sha256": "20bf5b91a054482f4172f64355f1ddaaa3c7786296e88b691547f69f1f8bb987"
     },
     {
       "path": "artifacts/hoa-tracker-mobile/hooks/useColors.ts",
       "sha256": "0a0cc5d229c3acf1ebe6742d4782d2a9330711bee35933fd3176b253a1aaa9e4"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/lib/coldStartNavigation.d.ts",
+      "sha256": "3fe484c27f28333cf916fa3213e97fcae87a263b6baa48d1443c9f2673143337"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/lib/coldStartNavigation.js",
+      "sha256": "a906249bb4df18750282890918222e4423fef75bf5bc59f38625202ee638a3b2"
     },
     {
       "path": "artifacts/hoa-tracker-mobile/lib/duesPayment.ts",
@@ -183,11 +191,11 @@
     },
     {
       "path": "artifacts/hoa-tracker-mobile/app.json",
-      "sha256": "ae34bd8eb45f148bdfd0a5ae9017719a2eeb8c28b891d7e34e15a9322c782166"
+      "sha256": "401d95c46f30e9b63b5223775ac39af5e3e64603396de5634553fa8ae1414efd"
     },
     {
       "path": "artifacts/hoa-tracker-mobile/package.json",
-      "sha256": "48b522772b14ddaed139e19463cf05ef6bf724c1c46f6c7b0f975d08dddf1de0"
+      "sha256": "edc347558b7beef12d14d403b9af4fe559394c634ef0d7b77291277944d6e2db"
     },
     {
       "path": "artifacts/hoa-tracker-mobile/metro.config.js",
@@ -220,6 +228,10 @@
     {
       "path": "artifacts/hoa-tracker-mobile/scripts/android-release-config.test.cjs",
       "sha256": "7cc2b3afd69b34490f2b5dcef676e02e64dc4b951c9eb93674134606ce359a6b"
+    },
+    {
+      "path": "artifacts/hoa-tracker-mobile/scripts/cold-start-navigation.test.cjs",
+      "sha256": "cb1c5f1dd6119f7bdbd197c735ccd2c4bef363c6173cd0e264460179c6c7f732"
     },
     {
       "path": "artifacts/hoa-tracker-mobile/scripts/build-android-apk.cjs",
@@ -255,7 +267,7 @@
     },
     {
       "path": "lib/api-client-react/src/generated/api.ts",
-      "sha256": "eaf3913f747a1fe413a33852c074d7f47f4f1bfbe8afba2473196a301053700a"
+      "sha256": "865c9ef1b8cac64132c4d3510ef921037042a4460be6fbecbab01b0565d952f1"
     },
     {
       "path": "lib/api-client-react/src/index.ts",
@@ -267,7 +279,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "f67f7fba32f78a9d242bdcdeec81cb4fbfc7fc047f0927ea17e412626823a4e6"
+      "sha256": "48978cb8b502ee51ce1233cc0ef3069a6563df446f59479a8594bbb506c10955"
     }
   ]
 }

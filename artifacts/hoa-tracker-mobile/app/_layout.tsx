@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { QueryClient, QueryClientProvider, focusManager } from '@tanstack/react-query';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
@@ -17,7 +17,7 @@ import {
   Outfit_700Bold,
   useFonts as useOutfitFonts,
 } from '@expo-google-fonts/outfit';
-import { Stack, useRouter } from 'expo-router';
+import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Notifications from 'expo-notifications';
 import { setBaseUrl, setAuthTokenGetter, setDefaultHeadersGetter } from '@workspace/api-client-react';
@@ -25,6 +25,7 @@ import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { AppState, Platform } from 'react-native';
 import { getAccessToken } from '@/lib/mobileTokens';
 import { getGateBellDeviceId } from '@/lib/gateBellDevice';
+import { acceptNotificationResponse } from '@/lib/coldStartNavigation';
 
 SplashScreen.preventAutoHideAsync();
 Notifications.setNotificationHandler({
@@ -53,10 +54,9 @@ focusManager.setEventListener((handleFocus) => {
 });
 
 function RootLayoutNav() {
-  const { isLoading, user, quickAccessMode, quickAccessStep, returnToGateBellAfterUnlock } = useAuth();
-  const router = useRouter();
-  const handledNotificationIds = useRef(new Set<string>());
-  const pendingNotificationId = useRef<string | null>(null);
+  const { isLoading, user, returnToGateBellAfterUnlock } = useAuth();
+  const receivedNotificationIds = useRef(new Set<string>());
+  const [pendingNotificationId, setPendingNotificationId] = useState<string | null>(null);
 
   useEffect(() => {
     if (Platform.OS === 'android') {
@@ -68,30 +68,40 @@ function RootLayoutNav() {
       }).catch(() => undefined);
     }
 
-    const openGateBell = (identifier: string) => {
-      if (handledNotificationIds.current.has(identifier)) return;
-      if (!user) {
-        pendingNotificationId.current = identifier;
-        return;
-      }
-      handledNotificationIds.current.add(identifier);
-      pendingNotificationId.current = null;
-      if (quickAccessStep || quickAccessMode) returnToGateBellAfterUnlock();
-      router.push('/gatebell');
-    };
+  }, []);
 
+  const receiveNotificationResponse = useCallback((identifier: string) => {
+    const accepted = acceptNotificationResponse(
+      identifier,
+      receivedNotificationIds.current,
+      () => Notifications.clearLastNotificationResponse(),
+    );
+    if (accepted) setPendingNotificationId(identifier);
+  }, []);
+
+  useEffect(() => {
+    let active = true;
     const subscription = Notifications.addNotificationResponseReceivedListener((response) => {
-      openGateBell(response.notification.request.identifier);
+      receiveNotificationResponse(response.notification.request.identifier);
     });
-    if (user && pendingNotificationId.current) openGateBell(pendingNotificationId.current);
+
     void Notifications.getLastNotificationResponseAsync()
       .then((response) => {
-        if (response) openGateBell(response.notification.request.identifier);
+        if (active && response) receiveNotificationResponse(response.notification.request.identifier);
       })
       .catch(() => undefined);
 
-    return () => subscription.remove();
-  }, [quickAccessMode, quickAccessStep, returnToGateBellAfterUnlock, router, user]);
+    return () => {
+      active = false;
+      subscription.remove();
+    };
+  }, [receiveNotificationResponse]);
+
+  useEffect(() => {
+    if (!user || !pendingNotificationId) return;
+    returnToGateBellAfterUnlock();
+    setPendingNotificationId(null);
+  }, [pendingNotificationId, returnToGateBellAfterUnlock, user]);
 
   if (isLoading) return null;
 

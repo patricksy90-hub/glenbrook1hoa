@@ -208,6 +208,87 @@ export function useGetAndroidRelease<
 }
 
 /**
+ * @summary Authorize and check the private APK without reading its bytes
+ */
+export const getCheckAndroidReleaseDownloadUrl = () => {
+  return `/api/mobile-release/android/download`;
+};
+
+export const checkAndroidReleaseDownload = async (
+  options?: RequestInit,
+): Promise<void> => {
+  return customFetch<void>(getCheckAndroidReleaseDownloadUrl(), {
+    ...options,
+    method: "HEAD",
+  });
+};
+
+export const getCheckAndroidReleaseDownloadMutationOptions = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof checkAndroidReleaseDownload>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof checkAndroidReleaseDownload>>,
+  TError,
+  void,
+  TContext
+> => {
+  const mutationKey = ["checkAndroidReleaseDownload"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof checkAndroidReleaseDownload>>,
+    void
+  > = () => {
+    return checkAndroidReleaseDownload(requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CheckAndroidReleaseDownloadMutationResult = NonNullable<
+  Awaited<ReturnType<typeof checkAndroidReleaseDownload>>
+>;
+
+export type CheckAndroidReleaseDownloadMutationError = ErrorType<void>;
+
+/**
+ * @summary Authorize and check the private APK without reading its bytes
+ */
+export const useCheckAndroidReleaseDownload = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof checkAndroidReleaseDownload>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof checkAndroidReleaseDownload>>,
+  TError,
+  void,
+  TContext
+> => {
+  return useMutation(getCheckAndroidReleaseDownloadMutationOptions(options));
+};
+
+/**
  * @summary Download the verified APK through account authorization
  */
 export const getDownloadAndroidReleaseUrl = () => {

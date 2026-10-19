@@ -82,7 +82,7 @@ jobs:
       - name: Install Android build dependencies
         run: sdkmanager "platforms;android-36" "build-tools;36.0.0" "ndk;27.1.12297006" "cmake;3.22.1"
       - name: Test build configuration
-        run: node --test artifacts/hoa-tracker-mobile/scripts/android-build-config.test.cjs artifacts/hoa-tracker-mobile/scripts/android-release-config.test.cjs
+        run: node --test artifacts/hoa-tracker-mobile/scripts/android-build-config.test.cjs artifacts/hoa-tracker-mobile/scripts/android-release-config.test.cjs artifacts/hoa-tracker-mobile/scripts/cold-start-navigation.test.cjs
       - name: Build and verify standalone production-signed APK
         env:
           FIREBASE_ANDROID_CONFIG_JSON: ${{ secrets.FIREBASE_ANDROID_CONFIG_JSON }}
