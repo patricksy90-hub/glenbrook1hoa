@@ -610,6 +610,42 @@ export interface GateBellEmergency {
   createdAt: string;
 }
 
+export type GateBellEmergencyRequestInputAlertType =
+  (typeof GateBellEmergencyRequestInputAlertType)[keyof typeof GateBellEmergencyRequestInputAlertType];
+
+export const GateBellEmergencyRequestInputAlertType = {
+  Medical_assistance: "Medical assistance",
+  Safety_concern: "Safety concern",
+  Other: "Other",
+} as const;
+
+export interface GateBellEmergencyRequestInput {
+  alertType: GateBellEmergencyRequestInputAlertType;
+}
+
+export type GateBellEmergencyRequestStatus =
+  (typeof GateBellEmergencyRequestStatus)[keyof typeof GateBellEmergencyRequestStatus];
+
+export const GateBellEmergencyRequestStatus = {
+  pending: "pending",
+  dispatched: "dispatched",
+  en_route: "en_route",
+  resolved: "resolved",
+} as const;
+
+export interface GateBellEmergencyRequest {
+  id: number;
+  unitId: number;
+  blockNumber: number;
+  lotNumber: number;
+  residentName: string;
+  alertType: string;
+  status: GateBellEmergencyRequestStatus;
+  /** @nullable */
+  emergencyId: number | null;
+  createdAt: string;
+}
+
 export interface GateBellAuditEvent {
   id: number;
   kind: string;
@@ -641,6 +677,26 @@ export interface GateBellActiveShift {
   roster: GateBellRosterEntry[];
 }
 
+export type GateBellPushReadinessDeliveryConfirmation =
+  (typeof GateBellPushReadinessDeliveryConfirmation)[keyof typeof GateBellPushReadinessDeliveryConfirmation];
+
+export const GateBellPushReadinessDeliveryConfirmation = {
+  not_available: "not_available",
+} as const;
+
+export interface GateBellPushReadiness {
+  /** @minimum 0 */
+  activeAssignments: number;
+  /** @minimum 0 */
+  registeredAssignments: number;
+  /** @minimum 0 */
+  missingRegistrations: number;
+  deliveryConfirmation: GateBellPushReadinessDeliveryConfirmation;
+}
+
+/**
+ * Readiness contains aggregate active assignment counts only. It does not expose device tokens, resident contact details, or confirm push delivery.
+ */
 export interface GateBellState {
   role: GateBellStateRole;
   serverTime: string;
@@ -649,10 +705,12 @@ export interface GateBellState {
   activeShift: GateBellActiveShift | null;
   calls: GateBellCall[];
   emergencies: GateBellEmergency[];
+  emergencyRequests: GateBellEmergencyRequest[];
   activity: GateBellAuditEvent[];
   /** @minimum 0 */
   searchCount: number;
   pushAvailable: boolean;
+  pushReadiness: GateBellPushReadiness | null;
 }
 
 export interface GateBellHandoverInput {

@@ -1,10 +1,19 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { releaseConfig, configureReleaseGradle, fingerprint } = require('./android-release-config.cjs');
+const {
+  releaseConfig, configureReleaseGradle, fingerprint, assertVersionCodeAdvances,
+} = require('./android-release-config.cjs');
 
 test('missing credentials never fall back to debug signing', () => {
   assert.throws(() => releaseConfig({}), /Missing release signing/);
   assert.throws(() => fingerprint(''), /fingerprint/);
+});
+
+test('candidate Android versionCode must advance beyond the active private release', () => {
+  assert.equal(assertVersionCodeAdvances(8, 7), 8);
+  assert.throws(() => assertVersionCodeAdvances(7, 7), /must exceed the active private release/);
+  assert.throws(() => assertVersionCodeAdvances(6, 7), /must exceed the active private release/);
+  assert.equal(assertVersionCodeAdvances(1, null), 1);
 });
 
 test('release key material requires a pinned certificate and strong passwords', () => {

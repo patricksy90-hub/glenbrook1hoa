@@ -29,6 +29,38 @@ jobs:
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
+      - name: Reject reused Android versionCode before release build setup
+        env:
+          API_HOST_INPUT: ${{ inputs.api_hostname }}
+        run: |
+          node <<'JS'
+          const fs = require('node:fs');
+          const { assertVersionCodeAdvances } = require('./artifacts/hoa-tracker-mobile/scripts/android-release-config.cjs');
+          (async () => {
+            try {
+              const target = JSON.parse(fs.readFileSync('.github/android-release-target.json', 'utf8'));
+              const hostname = process.env.API_HOST_INPUT || target.apiHostname;
+              if (!/^[a-z0-9.-]+\.[a-z]+$/i.test(hostname)) throw new Error('Invalid production API hostname.');
+              const candidate = JSON.parse(fs.readFileSync('artifacts/hoa-tracker-mobile/app.json', 'utf8'));
+              const response = await fetch(`https://${hostname}/api/mobile-release/android/version-code`, {
+                signal: AbortSignal.timeout(20000),
+              });
+              if (!response.ok) throw new Error('Cannot verify the active private Android release.');
+              const current = await response.json();
+              let currentVersionCode;
+              if (current.available === true && Number.isSafeInteger(current.versionCode) && current.versionCode > 0) {
+                currentVersionCode = current.versionCode;
+              } else if (current.available !== false || current.versionCode != null) {
+                throw new Error('Cannot verify the active private Android release.');
+              }
+              assertVersionCodeAdvances(candidate.expo.android.versionCode, currentVersionCode);
+              console.log('Candidate Android versionCode is newer than the active private release.');
+            } catch (error) {
+              console.error(error.message || 'Cannot verify the active private Android release.');
+              process.exitCode = 1;
+            }
+          })();
+          JS
       - uses: pnpm/action-setup@v4
         with:
           version: 10.26.1
@@ -82,7 +114,7 @@ jobs:
       - name: Install Android build dependencies
         run: sdkmanager "platforms;android-36" "build-tools;36.0.0" "ndk;27.1.12297006" "cmake;3.22.1"
       - name: Test build configuration
-        run: node --test artifacts/hoa-tracker-mobile/scripts/android-build-config.test.cjs artifacts/hoa-tracker-mobile/scripts/android-release-config.test.cjs artifacts/hoa-tracker-mobile/scripts/cold-start-navigation.test.cjs
+        run: node --test artifacts/hoa-tracker-mobile/scripts/android-build-config.test.cjs artifacts/hoa-tracker-mobile/scripts/android-release-config.test.cjs artifacts/hoa-tracker-mobile/scripts/cold-start-navigation.test.cjs artifacts/hoa-tracker-mobile/scripts/ota-config.test.cjs
       - name: Build and verify standalone production-signed APK
         env:
           FIREBASE_ANDROID_CONFIG_JSON: ${{ secrets.FIREBASE_ANDROID_CONFIG_JSON }}

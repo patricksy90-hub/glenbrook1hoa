@@ -43,11 +43,12 @@ interface Props {
   sessionKey?: number;
   feePerPeriod: number;
   onClose: () => void;
+  onAdvanceAmountChanged: () => Promise<void>;
   onCheckoutCreated: (p: PendingCheckout, opened: boolean) => void;
   onCashDeclared: (result: CashDuesDeclaration) => void;
 }
 
-export function DuesPaymentSheet({ visible, dues, advances, onlineEnabled, sessionKey, feePerPeriod, onClose, onCheckoutCreated, onCashDeclared }: Props) {
+export function DuesPaymentSheet({ visible, dues, advances, onlineEnabled, sessionKey, feePerPeriod, onClose, onAdvanceAmountChanged, onCheckoutCreated, onCashDeclared }: Props) {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
@@ -92,7 +93,12 @@ export function DuesPaymentSheet({ visible, dues, advances, onlineEnabled, sessi
     } catch (e) {
       if (alive()) {
         if (kind === 'pay') setVerified(false);
-        const status = (e as { status?: number })?.status;
+        const paymentError = e as { status?: number; data?: { code?: string } | null };
+        if (kind === 'pay' && paymentError.data?.code === 'ADVANCE_AMOUNT_CHANGED') {
+          await onAdvanceAmountChanged();
+          return;
+        }
+        const status = paymentError.status;
         setError(kind === 'pay'
           ? status === 409 ? 'Monthly dues changed. Close this sheet, refresh the advance periods, and review the updated amount before submitting.'
             : status === 403 ? 'Please verify again. Your verification may have expired or the selection is no longer allowed.'

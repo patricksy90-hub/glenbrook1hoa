@@ -45,6 +45,10 @@ function buildEnvironment(env) {
   child.CI = '1';
   child.EXPO_NO_TELEMETRY = '1';
   child.EXPO_PUBLIC_DOMAIN = validateDomain(env.EXPO_PUBLIC_DOMAIN);
+  if (env.HOA_OTA_CHANNEL) {
+    if (!['production', 'test'].includes(env.HOA_OTA_CHANNEL)) throw new Error('Unknown OTA channel.');
+    child.HOA_OTA_CHANNEL = env.HOA_OTA_CHANNEL;
+  }
   if (env.EXPO_PUBLIC_WEB_PORTAL_URL) {
     let url;
     try { url = new URL(env.EXPO_PUBLIC_WEB_PORTAL_URL); } catch {}

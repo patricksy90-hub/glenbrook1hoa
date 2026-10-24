@@ -2,7 +2,20 @@
   "expo": {
     "name": "Glenbrook 1 HOA Mobile",
     "slug": "hoa-tracker-mobile",
-    "version": "1.0.1",
+    "version": "1.0.2",
+    "runtimeVersion": "gl1-android-ota-3",
+    "updates": {
+      "enabled": true,
+      "url": "https://glenbrook1hoa.org/api/mobile-updates/android/production/manifest",
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0,
+      "useEmbeddedUpdate": true,
+      "codeSigningCertificate": "./assets/updates/certificate.pem",
+      "codeSigningMetadata": {
+        "keyid": "gl1-ota-1",
+        "alg": "rsa-v1_5-sha256"
+      }
+    },
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "hoa-tracker-mobile",
@@ -19,7 +32,7 @@
     },
     "android": {
       "package": "com.glenbrook1.hoatracker",
-      "versionCode": 2
+      "versionCode": 3
     },
     "web": {
       "favicon": "./assets/images/icon.png"

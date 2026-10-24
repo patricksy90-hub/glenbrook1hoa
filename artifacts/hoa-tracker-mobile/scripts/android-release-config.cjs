@@ -10,6 +10,20 @@ function fingerprint(value) {
   return normalized;
 }
 
+function assertVersionCodeAdvances(candidateVersionCode, currentVersionCode) {
+  if (!Number.isSafeInteger(candidateVersionCode) || candidateVersionCode < 1) {
+    throw new Error('Candidate Android versionCode must be a positive integer.');
+  }
+  if (currentVersionCode == null) return candidateVersionCode;
+  if (!Number.isSafeInteger(currentVersionCode) || currentVersionCode < 1) {
+    throw new Error('Active private Android release versionCode is invalid.');
+  }
+  if (candidateVersionCode <= currentVersionCode) {
+    throw new Error('Candidate Android versionCode must exceed the active private release.');
+  }
+  return candidateVersionCode;
+}
+
 function releaseConfig(env) {
   for (const name of ['ANDROID_RELEASE_KEYSTORE_BASE64', 'ANDROID_RELEASE_STORE_PASSWORD', 'ANDROID_RELEASE_KEY_PASSWORD', 'ANDROID_RELEASE_KEY_ALIAS']) {
     if (!env[name]) throw new Error(`Missing release signing setting: ${name}. Debug signing is not allowed.`);
@@ -83,4 +97,6 @@ function inspectRelease(apk, sdk, env, expectedCertificate, expectedVersionCode)
   };
 }
 
-module.exports = { releaseConfig, configureReleaseGradle, fingerprint, inspectRelease };
+module.exports = {
+  releaseConfig, configureReleaseGradle, fingerprint, inspectRelease, assertVersionCodeAdvances,
+};

@@ -49,6 +49,8 @@ import type {
   GateBellDeviceStatus,
   GateBellEmergency,
   GateBellEmergencyInput,
+  GateBellEmergencyRequest,
+  GateBellEmergencyRequestInput,
   GateBellEmergencyUpdate,
   GateBellGate,
   GateBellGateInput,
@@ -131,6 +133,186 @@ type AwaitedInput<T> = PromiseLike<T> | T;
 type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
+/**
+ * Code-only bootstrap endpoint, not an APK or resident-data download. Requires Expo protocol/runtime/platform headers; compatible signed updates are selected by channel and native runtime.
+ * @summary Expo Updates v1 signed application-code manifest or rollback directive
+ */
+export const getGetAndroidOtaManifestUrl = (channel: "test" | "production") => {
+  return `/api/mobile-updates/android/${channel}/manifest`;
+};
+
+export const getAndroidOtaManifest = async (
+  channel: "test" | "production",
+  options?: RequestInit,
+): Promise<Blob | void> => {
+  return customFetch<Blob | void>(getGetAndroidOtaManifestUrl(channel), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetAndroidOtaManifestQueryKey = (
+  channel: "test" | "production",
+) => {
+  return [`/api/mobile-updates/android/${channel}/manifest`] as const;
+};
+
+export const getGetAndroidOtaManifestQueryOptions = <
+  TData = Awaited<ReturnType<typeof getAndroidOtaManifest>>,
+  TError = ErrorType<void>,
+>(
+  channel: "test" | "production",
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getAndroidOtaManifest>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetAndroidOtaManifestQueryKey(channel);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getAndroidOtaManifest>>
+  > = ({ signal }) =>
+    getAndroidOtaManifest(channel, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!channel,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getAndroidOtaManifest>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetAndroidOtaManifestQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getAndroidOtaManifest>>
+>;
+export type GetAndroidOtaManifestQueryError = ErrorType<void>;
+
+/**
+ * @summary Expo Updates v1 signed application-code manifest or rollback directive
+ */
+
+export function useGetAndroidOtaManifest<
+  TData = Awaited<ReturnType<typeof getAndroidOtaManifest>>,
+  TError = ErrorType<void>,
+>(
+  channel: "test" | "production",
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getAndroidOtaManifest>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetAndroidOtaManifestQueryOptions(channel, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Immutable content-addressed application-code asset
+ */
+export const getGetAndroidOtaAssetUrl = (hash: string) => {
+  return `/api/mobile-updates/android/assets/${hash}`;
+};
+
+export const getAndroidOtaAsset = async (
+  hash: string,
+  options?: RequestInit,
+): Promise<Blob> => {
+  return customFetch<Blob>(getGetAndroidOtaAssetUrl(hash), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetAndroidOtaAssetQueryKey = (hash: string) => {
+  return [`/api/mobile-updates/android/assets/${hash}`] as const;
+};
+
+export const getGetAndroidOtaAssetQueryOptions = <
+  TData = Awaited<ReturnType<typeof getAndroidOtaAsset>>,
+  TError = ErrorType<void>,
+>(
+  hash: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getAndroidOtaAsset>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetAndroidOtaAssetQueryKey(hash);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getAndroidOtaAsset>>
+  > = ({ signal }) => getAndroidOtaAsset(hash, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!hash,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getAndroidOtaAsset>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetAndroidOtaAssetQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getAndroidOtaAsset>>
+>;
+export type GetAndroidOtaAssetQueryError = ErrorType<void>;
+
+/**
+ * @summary Immutable content-addressed application-code asset
+ */
+
+export function useGetAndroidOtaAsset<
+  TData = Awaited<ReturnType<typeof getAndroidOtaAsset>>,
+  TError = ErrorType<void>,
+>(
+  hash: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getAndroidOtaAsset>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetAndroidOtaAssetQueryOptions(hash, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
 
 /**
  * @summary Authenticated private Android release availability
@@ -2113,7 +2295,7 @@ export const useHandoverGateBellShift = <
 };
 
 /**
- * Tokens are accepted only on native bearer-authenticated Android sessions. Tokens are never sent to other clients.
+ * Tokens are accepted only on native bearer-authenticated Android sessions for residents or guards with an active gate assignment. Tokens are never sent to other clients.
  * @summary Register or disable this Android device's FCM delivery token
  */
 export const getRegisterGateBellDeviceUrl = () => {
@@ -3340,6 +3522,185 @@ export const useUpdateGateBellEmergency = <
   TContext
 > => {
   return useMutation(getUpdateGateBellEmergencyMutationOptions(options));
+};
+
+/**
+ * @summary Request security assistance for the authenticated resident's unit
+ */
+export const getCreateGateBellEmergencyRequestUrl = () => {
+  return `/api/gatebell/emergency-requests`;
+};
+
+export const createGateBellEmergencyRequest = async (
+  gateBellEmergencyRequestInput: GateBellEmergencyRequestInput,
+  options?: RequestInit,
+): Promise<GateBellEmergencyRequest> => {
+  return customFetch<GateBellEmergencyRequest>(
+    getCreateGateBellEmergencyRequestUrl(),
+    {
+      ...options,
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(gateBellEmergencyRequestInput),
+    },
+  );
+};
+
+export const getCreateGateBellEmergencyRequestMutationOptions = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createGateBellEmergencyRequest>>,
+    TError,
+    { data: BodyType<GateBellEmergencyRequestInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createGateBellEmergencyRequest>>,
+  TError,
+  { data: BodyType<GateBellEmergencyRequestInput> },
+  TContext
+> => {
+  const mutationKey = ["createGateBellEmergencyRequest"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createGateBellEmergencyRequest>>,
+    { data: BodyType<GateBellEmergencyRequestInput> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createGateBellEmergencyRequest(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateGateBellEmergencyRequestMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createGateBellEmergencyRequest>>
+>;
+export type CreateGateBellEmergencyRequestMutationBody =
+  BodyType<GateBellEmergencyRequestInput>;
+export type CreateGateBellEmergencyRequestMutationError = ErrorType<void>;
+
+/**
+ * @summary Request security assistance for the authenticated resident's unit
+ */
+export const useCreateGateBellEmergencyRequest = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createGateBellEmergencyRequest>>,
+    TError,
+    { data: BodyType<GateBellEmergencyRequestInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createGateBellEmergencyRequest>>,
+  TError,
+  { data: BodyType<GateBellEmergencyRequestInput> },
+  TContext
+> => {
+  return useMutation(getCreateGateBellEmergencyRequestMutationOptions(options));
+};
+
+/**
+ * @summary Explicitly dispatch a roving guard for a pending resident request
+ */
+export const getDispatchGateBellEmergencyRequestUrl = (requestId: number) => {
+  return `/api/gatebell/emergency-requests/${requestId}/dispatch`;
+};
+
+export const dispatchGateBellEmergencyRequest = async (
+  requestId: number,
+  options?: RequestInit,
+): Promise<GateBellEmergencyRequest> => {
+  return customFetch<GateBellEmergencyRequest>(
+    getDispatchGateBellEmergencyRequestUrl(requestId),
+    {
+      ...options,
+      method: "POST",
+    },
+  );
+};
+
+export const getDispatchGateBellEmergencyRequestMutationOptions = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof dispatchGateBellEmergencyRequest>>,
+    TError,
+    { requestId: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof dispatchGateBellEmergencyRequest>>,
+  TError,
+  { requestId: number },
+  TContext
+> => {
+  const mutationKey = ["dispatchGateBellEmergencyRequest"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof dispatchGateBellEmergencyRequest>>,
+    { requestId: number }
+  > = (props) => {
+    const { requestId } = props ?? {};
+
+    return dispatchGateBellEmergencyRequest(requestId, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DispatchGateBellEmergencyRequestMutationResult = NonNullable<
+  Awaited<ReturnType<typeof dispatchGateBellEmergencyRequest>>
+>;
+
+export type DispatchGateBellEmergencyRequestMutationError = ErrorType<void>;
+
+/**
+ * @summary Explicitly dispatch a roving guard for a pending resident request
+ */
+export const useDispatchGateBellEmergencyRequest = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof dispatchGateBellEmergencyRequest>>,
+    TError,
+    { requestId: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof dispatchGateBellEmergencyRequest>>,
+  TError,
+  { requestId: number },
+  TContext
+> => {
+  return useMutation(
+    getDispatchGateBellEmergencyRequestMutationOptions(options),
+  );
 };
 
 /**

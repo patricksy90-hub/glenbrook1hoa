@@ -32,6 +32,8 @@ import {
   useAddGateBellMessage,
   useCreateGateBellEmergency,
   useUpdateGateBellEmergency,
+  useCreateGateBellEmergencyRequest,
+  useDispatchGateBellEmergencyRequest,
   registerGateBellDevice,
   unregisterGateBellDevice,
   requestGateBellCallPhotoUploadUrl,
@@ -43,6 +45,7 @@ import {
 import { useColors } from '@/hooks/useColors';
 import { useAuth } from '@/contexts/AuthContext';
 import { Surface } from '@/components/Surface';
+import { SecurityContactsCard } from '@/components/SecurityContactsCard';
 import { LoadingState, ErrorState } from '@/components/ScreenState';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -125,9 +128,11 @@ export default function GateBellScreen() {
   const [pushPermissionGranted, setPushPermissionGranted] = useState<boolean | null>(null);
   const [pushBusy, setPushBusy] = useState(false);
   const [pushFeedback, setPushFeedback] = useState('');
+  const [confirmEmergency, setConfirmEmergency] = useState(false);
+  const [residentAlertType, setResidentAlertType] = useState<'Medical assistance' | 'Safety concern' | 'Other'>('Medical assistance');
 
   useEffect(() => {
-    if (!isResident || Platform.OS !== 'android') return;
+    if ((!isResident && !isGuard) || Platform.OS !== 'android') return;
     let active = true;
     void Notifications.getPermissionsAsync().then((permission) => {
       if (active) setPushPermissionGranted(permission.granted);
@@ -135,7 +140,7 @@ export default function GateBellScreen() {
       if (active) setPushPermissionGranted(false);
     });
     return () => { active = false; };
-  }, [isResident]);
+  }, [isResident, isGuard]);
 
   const stateQuery = useGetGateBellState({
     query: {
@@ -146,6 +151,13 @@ export default function GateBellScreen() {
     },
   });
   const state = stateQuery.data;
+  useEffect(() => {
+    if (Platform.OS === 'web') return;
+    const subscription = Notifications.addNotificationReceivedListener(() => {
+      void queryClient.invalidateQueries({ queryKey: getGetGateBellStateQueryKey() });
+    });
+    return () => subscription.remove();
+  }, [queryClient]);
   const normalizedSearch = search.trim();
   const searchQuery = useSearchGateBellUnits(
     { search: normalizedSearch || undefined },
@@ -175,6 +187,8 @@ export default function GateBellScreen() {
   });
   const createEmergency = useCreateGateBellEmergency();
   const updateEmergency = useUpdateGateBellEmergency();
+  const createEmergencyRequest = useCreateGateBellEmergencyRequest();
+  const dispatchEmergencyRequest = useDispatchGateBellEmergencyRequest();
 
   const refreshState = () => queryClient.invalidateQueries({ queryKey: getGetGateBellStateQueryKey() });
   const calls = state?.calls ?? [];
@@ -183,7 +197,8 @@ export default function GateBellScreen() {
   const emergencyOpen = (state?.emergencies ?? []).filter(item => item.status !== 'resolved');
   const currentGate = state?.gates.find(gate => gate.id === state.context?.gateId);
   const mutationBusy = working || selectContext.isPending || handover.isPending || createCall.isPending
-    || decideCall.isPending || addMessage.isPending || createEmergency.isPending || updateEmergency.isPending;
+    || decideCall.isPending || addMessage.isPending || createEmergency.isPending || updateEmergency.isPending
+    || createEmergencyRequest.isPending || dispatchEmergencyRequest.isPending;
 
   const enableBackgroundAlerts = async () => {
     setPushBusy(true);
@@ -196,6 +211,7 @@ export default function GateBellScreen() {
       setPushPermissionGranted(permission.granted);
       if (!permission.granted) {
         await unregisterGateBellDevice();
+        await refreshState();
         setPushFeedback(
           permission.canAskAgain
             ? 'Notifications are off. You can enable them later from this screen.'
@@ -212,6 +228,7 @@ export default function GateBellScreen() {
         throw new Error('Android did not return a valid notification token.');
       }
       await registerGateBellDevice({ token: token.data, permission: 'granted' });
+      await refreshState();
       setPushFeedback('Background GateBell alerts are enabled on this device.');
     } catch {
       setPushFeedback('Could not register this device for alerts. Confirm Firebase is configured and try again.');
@@ -225,6 +242,7 @@ export default function GateBellScreen() {
     setPushFeedback('');
     try {
       await unregisterGateBellDevice();
+      await refreshState();
       setPushFeedback('GateBell alerts are turned off on this device.');
     } catch {
       setPushFeedback('Could not turn off GateBell alerts right now. Check your connection and retry.');
@@ -307,8 +325,12 @@ export default function GateBellScreen() {
   if (!isAdmin && !isGuard && !isResident) {
     return <View style={[styles.accessDenied, { backgroundColor: colors.background }]}><Feather name="lock" size={24} color={colors.mutedForeground} /><Text style={[styles.emptyTitle, { color: colors.foreground }]}>GateBell access is not available for this account.</Text></View>;
   }
-  if (stateQuery.isLoading) return <LoadingState />;
-  if (stateQuery.isError || !state) return <ErrorState onRetry={() => { void stateQuery.refetch(); }} />;
+  if (stateQuery.isLoading || stateQuery.isError || !state) return (
+    <View style={{ flex: 1, padding: 16, backgroundColor: colors.background }}>
+      {isResident && <SecurityContactsCard />}
+      {stateQuery.isLoading ? <LoadingState /> : <ErrorState onRetry={() => { void stateQuery.refetch(); }} />}
+    </View>
+  );
 
   const renderCall = (call: GateBellCall) => (
     <Surface key={call.id} style={[styles.callCard, { borderColor: call.status === 'pending' ? '#d99245' : colors.border }]} elevated>
@@ -444,21 +466,93 @@ export default function GateBellScreen() {
       {!state.pushAvailable && !isResident && (
         <FeedbackBanner text="Firebase is not configured for background alerts. GateBell records remain available here." colors={colors} tone="warning" />
       )}
+      {(isAdmin || isGuard) && state.pushReadiness && (
+        <Surface style={[styles.infoCard, { borderColor: state.pushReadiness.missingRegistrations > 0 ? '#e4c98e' : colors.border }]}>
+          <Text style={[styles.cardTitle, { color: colors.foreground }]}>{isGuard ? 'This post’s emergency alert readiness' : 'On-duty emergency alert readiness'}</Text>
+          {state.pushReadiness.activeAssignments === 0 ? (
+            <Text style={[styles.bodyText, { color: colors.mutedForeground, marginTop: 5 }]}>
+              {isGuard
+                ? 'No active gate post is assigned to this device; it cannot receive GateBell alerts. Use the community security hotline for urgent help.'
+                : 'No active guard post is registered to receive GateBell alerts. Use the community security hotline for urgent help.'}
+            </Text>
+          ) : (
+            <>
+              <Text style={[styles.bodyText, { color: colors.mutedForeground, marginTop: 5 }]}>
+                {isGuard
+                  ? state.pushReadiness.missingRegistrations > 0
+                    ? 'No active Android push phone is registered for this post.'
+                    : 'An active Android push phone is registered for this post.'
+                  : `${state.pushReadiness.registeredAssignments} of ${state.pushReadiness.activeAssignments} active guard posts have a registered Android push phone.`}
+              </Text>
+              {state.pushReadiness.missingRegistrations > 0 && (
+                <Text style={[styles.bodyText, { color: colors.destructive, fontWeight: '700', marginTop: 5 }]}>If no guard phone is registered, use the community security hotline for urgent help.</Text>
+              )}
+            </>
+          )}
+          <Text style={[styles.smallText, { color: colors.mutedForeground, marginTop: 8 }]}>Registration indicates setup only; GateBell cannot confirm that an alert was delivered.</Text>
+        </Surface>
+      )}
 
       {isResident && (
+        <>
+          <SecurityContactsCard />
+          <Surface style={styles.infoCard}>
+            <Text style={[styles.cardTitle, { color: colors.foreground }]}>Request emergency assistance</Text>
+            <Text style={[styles.bodyText, { color: colors.mutedForeground }]}>Send a request for your registered household to on-duty security. Notifications depend on connectivity and phone settings. A saved request is not confirmation that help is on the way.</Text>
+            <View style={styles.chipWrap}>
+              {(['Medical assistance', 'Safety concern', 'Other'] as const).map(type => (
+                <ChoiceChip key={type} label={type} selected={residentAlertType === type} colors={colors} onPress={() => { setResidentAlertType(type); setConfirmEmergency(false); }} />
+              ))}
+            </View>
+            {(state.emergencyRequests ?? []).some(request => request.status === 'pending')
+              ? <Text accessibilityRole="alert" style={[styles.bodyText, { color: colors.destructive }]}>Your household already has a pending request. Call the hotline if help is urgent.</Text>
+              : confirmEmergency ? (
+                <View style={{ gap: 8, marginTop: 12 }}>
+                  <Text style={[styles.bodyText, { color: colors.foreground }]}>Send a {residentAlertType.toLowerCase()} request for your household now?</Text>
+                  <ActionButton title="Confirm and alert security" icon="alert-triangle" colors={colors} destructive disabled={mutationBusy} onPress={() => void perform(
+                    () => createEmergencyRequest.mutateAsync({ data: { alertType: residentAlertType } }),
+                    'Request recorded. Wait for security to dispatch; call the hotline for urgent help.',
+                    () => setConfirmEmergency(false),
+                  )} />
+                  <SmallAction title="Cancel" colors={colors} disabled={mutationBusy} onPress={() => setConfirmEmergency(false)} />
+                </View>
+              ) : <ActionButton title="Request security assistance" icon="alert-triangle" colors={colors} destructive disabled={mutationBusy} onPress={() => setConfirmEmergency(true)} />}
+          </Surface>
+        </>
+      )}
+
+      {(state.emergencyRequests ?? []).length > 0 && (
+        <Surface style={styles.infoCard}>
+          <Text style={[styles.cardTitle, { color: colors.foreground }]}>{isResident ? 'Your household requests' : 'Resident emergency requests'}</Text>
+          {state.emergencyRequests.map(request => (
+            <View key={request.id} style={{ paddingVertical: 12, borderBottomWidth: 1, borderColor: colors.border, gap: 6 }}>
+              <Text style={[styles.cardTitle, { color: request.status === 'pending' ? colors.destructive : colors.foreground }]}>{request.alertType} · {request.status === 'pending' ? 'Awaiting security' : statusLabel[request.status]}</Text>
+              <Text style={[styles.smallText, { color: colors.mutedForeground }]}>{unitName(request)} · {request.residentName} · {formatTime(request.createdAt)}</Text>
+              {isGuard && request.status === 'pending' && <ActionButton title="Dispatch roving guard" icon="shield" colors={colors} disabled={mutationBusy || !state.context} onPress={() => void perform(
+                () => dispatchEmergencyRequest.mutateAsync({ requestId: request.id }),
+                'Roving guard dispatch recorded.',
+              )} />}
+            </View>
+          ))}
+        </Surface>
+      )}
+
+      {(isResident || isGuard) && (
         <Surface elevated style={{ padding: 16, marginTop: 14 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
             <Feather name="bell" size={19} color={colors.primary} />
             <View style={{ flex: 1 }}>
               <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Background alerts</Text>
               <Text style={[styles.smallText, { color: colors.mutedForeground, marginTop: 3 }]}>
-                {Platform.OS !== 'android'
+                {isGuard && !state.context
+                  ? 'Start a gate post below, then enable notifications to receive resident emergencies on this phone.'
+                  : Platform.OS !== 'android'
                   ? 'GateBell background alerts are available in the Android app.'
                   : !state.pushAvailable
                     ? 'Firebase setup is still needed. You can respond while GateBell is open.'
                     : pushPermissionGranted
-                      ? 'This phone can receive GateBell alerts when the app is closed.'
-                      : 'Enable notifications to hear about a gate call when the app is closed.'}
+                      ? 'Notifications are allowed. Enable or refresh registration below to receive alerts on this device.'
+                      : isGuard ? 'Enable notifications to hear resident emergency requests while the app is closed.' : 'Enable notifications to hear about a gate call when the app is closed.'}
               </Text>
             </View>
           </View>
@@ -466,7 +560,7 @@ export default function GateBellScreen() {
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 12 }}>
               <Pressable
                 accessibilityRole="button"
-                disabled={pushBusy || !state.pushAvailable}
+                disabled={pushBusy || !state.pushAvailable || (isGuard && !state.context)}
                 onPress={() => void enableBackgroundAlerts()}
                 style={[{ minHeight: 42, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 12 }, { backgroundColor: colors.primary, borderRadius: colors.radius, opacity: pushBusy || !state.pushAvailable ? 0.55 : 1 }]}
               >

@@ -5,6 +5,7 @@ const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 const { PACKAGE, validateAndroidConfig, buildEnvironment } = require('./android-build-config.cjs');
 const { configureReleaseGradle, inspectRelease } = require('./android-release-config.cjs');
+const { checkNativeCompatibility } = require('./ota-native-config.cjs');
 
 const root = path.resolve(__dirname, '../../..');
 const mobileRelative = 'artifacts/hoa-tracker-mobile';
@@ -18,6 +19,8 @@ function run(command, args, cwd, env) {
 
 function build(prepareOnly, release) {
   const env = buildEnvironment(process.env);
+  env.HOA_OTA_DISABLED = release ? '0' : '1';
+  if (release) checkNativeCompatibility(root);
   const output = path.join(root, `generated-artifacts/android/${release ? 'glenbrook1-android' : 'gatebell-test'}.apk`);
   const sdk = env.ANDROID_HOME || env.ANDROID_SDK_ROOT;
   if (!prepareOnly && (!sdk || !fs.existsSync(path.join(sdk, 'platforms')) || !fs.existsSync(path.join(sdk, 'build-tools')))) {
@@ -39,7 +42,7 @@ function build(prepareOnly, release) {
     fs.mkdirSync(app, { recursive: true });
     for (const entry of [
       'app', 'assets', 'components', 'constants', 'contexts', 'hooks', 'lib',
-      'app.json', 'package.json', 'metro.config.js', 'babel.config.js', 'tsconfig.json', 'expo-env.d.ts',
+      'app.json', 'app.config.js', 'package.json', 'metro.config.js', 'babel.config.js', 'tsconfig.json', 'expo-env.d.ts',
     ]) {
       fs.cpSync(path.join(root, mobileRelative, entry), path.join(app, entry), {
         recursive: true,

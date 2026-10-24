@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, Pressable, Alert, Platform } from '
 import { useColors } from '@/hooks/useColors';
 import { useAuth } from '@/contexts/AuthContext';
 import { Surface } from '@/components/Surface';
+import { SecurityContactsCard } from '@/components/SecurityContactsCard';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { router, type Href } from 'expo-router';
@@ -43,6 +44,7 @@ export default function MoreScreen() {
       style={{ flex: 1, backgroundColor: colors.background }}
       contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 100 }}
     >
+      {(user?.role === 'owner' || user?.role === 'renter') && <SecurityContactsCard />}
       <View style={styles.group}>
         <Text style={[styles.groupTitle, { color: colors.mutedForeground }]}>SETTINGS</Text>
         <Surface style={styles.card} elevated>

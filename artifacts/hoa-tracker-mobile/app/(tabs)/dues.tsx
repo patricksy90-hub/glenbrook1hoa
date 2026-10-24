@@ -32,6 +32,7 @@ export default function DuesScreen() {
   const [advanceExpanded, setAdvanceExpanded] = useState(false);
   const [cashPending, setCashPending] = useState<number[]>([]);
   const [reviewing, setReviewing] = useState(false);
+  const [refreshingAdvanceAmounts, setRefreshingAdvanceAmounts] = useState(false);
   const [pending, setPending] = useState<PendingCheckout | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [focused, setFocused] = useState(false);
@@ -195,7 +196,7 @@ export default function DuesScreen() {
             <View style={{ flex: 1 }}><Text style={[styles.period, { color: colors.foreground }]}>Plan ahead</Text><Text style={[styles.date, { color: colors.mutedForeground }]}>Advance periods · cash at HOA office</Text></View>
             <Feather name={advanceExpanded ? 'chevron-up' : 'chevron-down'} size={20} color={colors.primary} />
           </Pressable>
-          {advanceExpanded && (upcoming.isLoading ? <Text style={{ color: colors.mutedForeground }}>Loading available periods…</Text> : upcoming.isError ? <Pressable testID="advance-retry" onPress={() => upcoming.refetch()} style={styles.advanceHeading}><Text style={{ color: colors.destructive }}>Could not load advance periods. Tap to retry.</Text></Pressable> : !advancePeriods.length ? <Text style={[styles.date, { color: colors.mutedForeground }]}>No unbilled advance periods are available.</Text> : advancePeriods.map(p => {
+          {advanceExpanded && (refreshingAdvanceAmounts ? <Text testID="advance-refreshing" style={{ color: colors.mutedForeground }}>Refreshing advance amounts…</Text> : upcoming.isLoading ? <Text style={{ color: colors.mutedForeground }}>Loading available periods…</Text> : upcoming.isError ? <Pressable testID="advance-retry" onPress={() => upcoming.refetch()} style={styles.advanceHeading}><Text style={{ color: colors.destructive }}>Could not load advance periods. Tap to retry.</Text></Pressable> : !advancePeriods.length ? <Text style={[styles.date, { color: colors.mutedForeground }]}>No unbilled advance periods are available.</Text> : advancePeriods.map(p => {
             const checked = selectedAdvance.includes(p.periodKey);
             return <Pressable key={p.periodKey} testID={`advance-select-${p.periodKey}`} accessibilityRole="checkbox" accessibilityState={{ checked }} onPress={() => setSelectedAdvance(s => s.includes(p.periodKey) ? s.filter(k => k !== p.periodKey) : [...s, p.periodKey])} style={[styles.advanceItem, { borderColor: checked ? colors.primary : colors.border, backgroundColor: checked ? colors.secondary : colors.card, borderRadius: colors.radius }]}>
               <Feather name={checked ? 'check-square' : 'square'} size={20} color={colors.primary} />
@@ -278,6 +279,24 @@ export default function DuesScreen() {
           sessionKey={userId}
         feePerPeriod={fee}
         onClose={() => setReviewing(false)}
+        onAdvanceAmountChanged={async () => {
+          setReviewing(false);
+          setSelectedAdvance([]);
+          setAdvanceExpanded(true);
+          setRefreshingAdvanceAmounts(true);
+          let refreshed = false;
+          try {
+            const result = await upcoming.refetch();
+            refreshed = !result.isError;
+          } catch {
+            refreshed = false;
+          } finally {
+            setRefreshingAdvanceAmounts(false);
+          }
+          setNotice(refreshed
+            ? 'Monthly dues changed. Updated advance amounts are shown below. Review them before selecting periods and submitting again.'
+            : 'Monthly dues changed, but the updated advance amounts could not be loaded. Refresh before selecting an advance period.');
+        }}
         onCheckoutCreated={(p, opened) => {
           setReviewing(false);
           setSelected([]);
