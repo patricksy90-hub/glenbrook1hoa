@@ -227,6 +227,83 @@ export function useGetAndroidOtaManifest<
 }
 
 /**
+ * @summary Download a privately staged APK, restricted to administrator and admin support release testers
+ */
+export const getDownloadAndroidApkCandidateUrl = () => {
+  return `/api/mobile-release/android/candidate/download`;
+};
+
+export const downloadAndroidApkCandidate = async (
+  options?: RequestInit,
+): Promise<Blob> => {
+  return customFetch<Blob>(getDownloadAndroidApkCandidateUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getDownloadAndroidApkCandidateQueryKey = () => {
+  return [`/api/mobile-release/android/candidate/download`] as const;
+};
+
+export const getDownloadAndroidApkCandidateQueryOptions = <
+  TData = Awaited<ReturnType<typeof downloadAndroidApkCandidate>>,
+  TError = ErrorType<void>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof downloadAndroidApkCandidate>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getDownloadAndroidApkCandidateQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof downloadAndroidApkCandidate>>
+  > = ({ signal }) =>
+    downloadAndroidApkCandidate({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof downloadAndroidApkCandidate>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type DownloadAndroidApkCandidateQueryResult = NonNullable<
+  Awaited<ReturnType<typeof downloadAndroidApkCandidate>>
+>;
+export type DownloadAndroidApkCandidateQueryError = ErrorType<void>;
+
+/**
+ * @summary Download a privately staged APK, restricted to administrator and admin support release testers
+ */
+
+export function useDownloadAndroidApkCandidate<
+  TData = Awaited<ReturnType<typeof downloadAndroidApkCandidate>>,
+  TError = ErrorType<void>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof downloadAndroidApkCandidate>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getDownloadAndroidApkCandidateQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
  * @summary Immutable content-addressed application-code asset
  */
 export const getGetAndroidOtaAssetUrl = (hash: string) => {

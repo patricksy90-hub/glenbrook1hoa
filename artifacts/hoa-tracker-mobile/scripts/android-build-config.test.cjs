@@ -1,6 +1,17 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { PACKAGE, validateAndroidConfig, validateDomain, buildEnvironment } = require('./android-build-config.cjs');
+const { PACKAGE, validateAndroidConfig, validateDomain, buildEnvironment, configureGradleProperties } = require('./android-build-config.cjs');
+test('native compilation has sufficient metaspace, bounded workers and fail-fast OOM handling', () => {
+  const configured = configureGradleProperties('org.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m\norg.gradle.parallel=true\nreactNativeArchitectures=armeabi-v7a,arm64-v8a,x86,x86_64\n');
+  assert.match(configured, /MaxMetaspaceSize=2048m/);
+  assert.match(configured, /ExitOnOutOfMemoryError/);
+  assert.match(configured, /org.gradle.workers.max=2/);
+  assert.match(configured, /org.gradle.parallel=false/);
+  assert.match(configured, /kotlin.compiler.execution.strategy=in-process/);
+  assert.equal((configured.match(/^org.gradle.jvmargs=/gm) || []).length, 1);
+  assert.doesNotMatch(configured, /MaxMetaspaceSize=512m/);
+  assert.match(configured, /reactNativeArchitectures=armeabi-v7a,arm64-v8a,x86,x86_64/);
+});
 
 function fixture() {
   return {

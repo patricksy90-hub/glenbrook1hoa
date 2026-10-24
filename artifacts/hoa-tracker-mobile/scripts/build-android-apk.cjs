@@ -3,7 +3,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
-const { PACKAGE, validateAndroidConfig, buildEnvironment } = require('./android-build-config.cjs');
+const { PACKAGE, validateAndroidConfig, buildEnvironment, configureGradleProperties } = require('./android-build-config.cjs');
 const { configureReleaseGradle, inspectRelease } = require('./android-release-config.cjs');
 const { checkNativeCompatibility } = require('./ota-native-config.cjs');
 
@@ -69,6 +69,8 @@ function build(prepareOnly, release) {
     run('pnpm', ['install', '--frozen-lockfile', '--filter', '@workspace/hoa-tracker-mobile...'], staging, env);
     run('pnpm', ['exec', 'expo', 'prebuild', '--platform', 'android', '--no-install'], app, env);
     const android = path.join(app, 'android');
+    const properties = path.join(android, 'gradle.properties');
+    fs.writeFileSync(properties, configureGradleProperties(fs.readFileSync(properties, 'utf8')));
     // Expo's generated release variant uses its test/debug signing key.
     // Refuse to silently produce a differently signed or unsigned build.
     const gradle = fs.readFileSync(path.join(android, 'app/build.gradle'), 'utf8');

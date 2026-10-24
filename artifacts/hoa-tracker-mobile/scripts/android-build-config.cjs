@@ -60,4 +60,16 @@ function buildEnvironment(env) {
   return child;
 }
 
-module.exports = { PACKAGE, validateAndroidConfig, validateDomain, buildEnvironment };
+function configureGradleProperties(text) {
+  const settings = {
+    'org.gradle.jvmargs': '-Xmx4096m -XX:MaxMetaspaceSize=2048m -XX:+ExitOnOutOfMemoryError -Dfile.encoding=UTF-8',
+    'org.gradle.workers.max': '2',
+    'org.gradle.parallel': 'false',
+    'kotlin.compiler.execution.strategy': 'in-process',
+    'kotlin.daemon.jvmargs': '-Xmx2048m -XX:MaxMetaspaceSize=1536m -XX:+ExitOnOutOfMemoryError',
+  };
+  const lines = text.split(/\r?\n/).filter(line => !Object.keys(settings).some(key => line.trimStart().startsWith(`${key}=`)));
+  return `${lines.join('\n').trimEnd()}\n\n# Bounded CI memory; never leave a failed compiler daemon running.\n${Object.entries(settings).map(([key, value]) => `${key}=${value}`).join('\n')}\n`;
+}
+
+module.exports = { PACKAGE, validateAndroidConfig, validateDomain, buildEnvironment, configureGradleProperties };

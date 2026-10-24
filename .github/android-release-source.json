@@ -19,7 +19,7 @@
     },
     {
       "path": ".github/workflows/android-release-apk.yml",
-      "sha256": "ec66c2744e70ff040d1fb3270c235ba392ce21108b0640ca30fb9f99060bcc9a"
+      "sha256": "b0ec2d2766efaf5c801a3fc33bb52ced85414acd7d142a6639b35014bdd39d55"
     },
     {
       "path": ".github/android-release-target.json",
@@ -199,7 +199,7 @@
     },
     {
       "path": "artifacts/hoa-tracker-mobile/app.json",
-      "sha256": "e92f750743efba75a0b76d278e5737f2fdbbf7e30a311ea2c1e9d5d64d24c310"
+      "sha256": "28577cf5a72572a8edaf21a7b83d035f534747303a18eeef7922a6c0fde4800d"
     },
     {
       "path": "artifacts/hoa-tracker-mobile/app.config.js",
@@ -227,11 +227,11 @@
     },
     {
       "path": "artifacts/hoa-tracker-mobile/scripts/android-build-config.cjs",
-      "sha256": "3d6d255ad5dc75cc6d76579ab75236777d9ee4c40561c76331c446fbe207fd1a"
+      "sha256": "09064a661c227d2a448a7700f6e72c8e2efbc8ec92bfa49effed25bbfdad3cea"
     },
     {
       "path": "artifacts/hoa-tracker-mobile/scripts/android-build-config.test.cjs",
-      "sha256": "fb876136898c370c5ec5a08f10999d5611531bcdd9ba2b70d8a53b827b986613"
+      "sha256": "86adf9916d942a9cf84950296ae87e989b26c3b7424611574e0fb94909842955"
     },
     {
       "path": "artifacts/hoa-tracker-mobile/scripts/android-release-config.cjs",
@@ -255,11 +255,11 @@
     },
     {
       "path": "artifacts/hoa-tracker-mobile/release/ota-native-lock.json",
-      "sha256": "2b55385bf24ab2cee1f20c5b7577bb982bda7825bc32442724f3839334b150bf"
+      "sha256": "9f2221857dc2138457ebe31143f8da5057ea8752d2014c407726cefa4e7f012c"
     },
     {
       "path": "artifacts/hoa-tracker-mobile/scripts/build-android-apk.cjs",
-      "sha256": "656536c252d416231c99a1269eab11200385e15fa1fc03568937f57a7377b5ed"
+      "sha256": "1fbb4c4408ffbee1fe5a2f71f556a84a49a760d24cad314b25cbd623ede0d38a"
     },
     {
       "path": "artifacts/hoa-tracker-mobile/scripts/build-android-release.cjs",
@@ -291,7 +291,7 @@
     },
     {
       "path": "lib/api-client-react/src/generated/api.ts",
-      "sha256": "1b36116fee947a7d32221ed16b05a7c7804b57a78b4bb2cb4664a767f8d8f648"
+      "sha256": "3575ca2f2fca1283b8ad86511b56696429aba5fc05eaa1d91aaaa2d96d41ef99"
     },
     {
       "path": "lib/api-client-react/src/index.ts",
