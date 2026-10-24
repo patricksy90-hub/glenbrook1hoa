@@ -2,6 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const path = require('node:path');
 const fs = require('node:fs');
+const { X509Certificate } = require('node:crypto');
 const root = path.resolve(__dirname, '../../..');
 const configure = require('../app.config.js');
 const { checkNativeCompatibility } = require('./ota-native-config.cjs');
@@ -11,7 +12,8 @@ test('OTA bootstrap retains Android identity, advances version and locks native 
   assert.equal(config.android.package, 'com.glenbrook1.hoatracker');
   assert.ok(config.android.versionCode >= 3);
   assert.equal(checkNativeCompatibility(root).runtimeVersion, config.runtimeVersion);
-  assert.match(fs.readFileSync(path.join(__dirname, '../assets/updates/certificate.pem'), 'utf8'), /BEGIN CERTIFICATE/);
+  const certificate = new X509Certificate(fs.readFileSync(path.join(__dirname, '../assets/updates/certificate.pem')));
+  assert.ok(certificate.keyUsage.includes('1.3.6.1.5.5.7.3.3'), 'Android requires the code-signing EKU');
 });
 test('production starts from embedded/cache and never forces a mid-session reload', () => {
   assert.equal(config.updates.checkAutomatically, 'ON_LOAD');

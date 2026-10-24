@@ -123,7 +123,7 @@
     },
     {
       "path": "artifacts/hoa-tracker-mobile/assets/updates/certificate.pem",
-      "sha256": "7cef1ba8428372a94ac7e584b7ee3d7ad156333d6d1fa152d08ab75d8a30208a"
+      "sha256": "8ec4bbb70b8f94cdb3b6be30179947a6791cd36db803984fdd766014913915bb"
     },
     {
       "path": "artifacts/hoa-tracker-mobile/components/DuesPaymentSheet.tsx",
@@ -199,7 +199,7 @@
     },
     {
       "path": "artifacts/hoa-tracker-mobile/app.json",
-      "sha256": "9fc9d3ba70fd29bcb672560315f04ddb452e564d257b94dd9a97b6d46cd8b08c"
+      "sha256": "e92f750743efba75a0b76d278e5737f2fdbbf7e30a311ea2c1e9d5d64d24c310"
     },
     {
       "path": "artifacts/hoa-tracker-mobile/app.config.js",
@@ -251,11 +251,11 @@
     },
     {
       "path": "artifacts/hoa-tracker-mobile/scripts/ota-config.test.cjs",
-      "sha256": "2f79e16a4ebbdbe5f723c9007b734c19efa043b01c2c09863a6f178450ca744e"
+      "sha256": "868b7bae38730ccb9f324e8a93c4c83989a726e523a9ad8e5749f2ec2ce14e63"
     },
     {
       "path": "artifacts/hoa-tracker-mobile/release/ota-native-lock.json",
-      "sha256": "d37776d283df32c5aab8d51caf72e5a396637ca97d68c6883e29a71d268ce6a5"
+      "sha256": "2b55385bf24ab2cee1f20c5b7577bb982bda7825bc32442724f3839334b150bf"
     },
     {
       "path": "artifacts/hoa-tracker-mobile/scripts/build-android-apk.cjs",

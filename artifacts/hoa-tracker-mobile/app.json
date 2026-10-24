@@ -2,8 +2,8 @@
   "expo": {
     "name": "Glenbrook 1 HOA Mobile",
     "slug": "hoa-tracker-mobile",
-    "version": "1.0.2",
-    "runtimeVersion": "gl1-android-ota-3",
+    "version": "1.0.3",
+    "runtimeVersion": "gl1-android-ota-4",
     "updates": {
       "enabled": true,
       "url": "https://glenbrook1hoa.org/api/mobile-updates/android/production/manifest",
@@ -32,7 +32,7 @@
     },
     "android": {
       "package": "com.glenbrook1.hoatracker",
-      "versionCode": 3
+      "versionCode": 4
     },
     "web": {
       "favicon": "./assets/images/icon.png"
